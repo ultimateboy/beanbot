@@ -1,6 +1,20 @@
 import usb.core
 import usb.util
+import xmpp
 
+# todo: move to settings file.
+jabberuser = ''
+jabberpass = ''
+jabbername = 'beanbot'
+jabberroom = ''
+jabberserver = ''
+jabberport = 5222
+
+# Weight in grams of empty/full pot of coffee.
+emptyweight = 400 
+fullweight = 500 
+
+# Scale USB Vendor/Product IDs.
 VENDOR_ID = 0x0922
 PRODUCT_ID = 0x8004
 
@@ -44,4 +58,18 @@ elif data[2] == DATA_MODE_GRAMS:
 
 print weight
 
+# send jabber message if out of coffee or there is a fresh pot.
+if raw_weight <= emptyweight:
+    messagebody = "We're out of coffee :("
+elif raw_weight >= fullweight:
+    messagebody = 'Fresh pot of coffee!'
 
+client = xmpp.Client(jabberserver)
+client.connect(server=(jabberserver, jabberport))
+client.auth(jabberuser,jabberpass,jabbername)
+client.sendInitPresence()
+client.send(xmpp.Presence(to="%s/%s" % (jabberroom, jabbername)))
+message = xmpp.protocol.Message(body=messagebody)
+message.setTo(jabberroom)
+message.setType('groupchat')
+client.send(message)
