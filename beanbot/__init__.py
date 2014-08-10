@@ -7,18 +7,7 @@ try:
 except ImportError:
     raise Exception("You need a local_settings.py file!")
 
-def send_jabber_message(messagebody):
-    client = xmpp.Client(JABBER_SERVER)
-    client.connect(server=(JABBER_SERVER, JABBER_PORT))
-    client.auth(JABBER_USER,JABBER_PASS,JABBER_NAME)
-    client.sendInitPresence()
-    client.send(xmpp.Presence(to="%s/%s" % (JABBER_ROOM, JABBER_NAME)))
-    message = xmpp.protocol.Message(body=messagebody)
-    message.setTo(JABBER_ROOM)
-    message.setType('groupchat')
-    client.send(message)
-
-def main():
+def read_scale_weight():
     # find the USB device
     device = usb.core.find(idVendor=VENDOR_ID, idProduct=PRODUCT_ID)
 
@@ -49,19 +38,35 @@ def main():
 
     raw_weight = data[4] + data[5] * 256
 
+    # scale gives different raw_weight depending on oz/g mode.
     if data[2] == DATA_MODE_OUNCES:
         ounces = raw_weight * 0.1
-        weight = "%s oz" % ounces
+        grams = ounces / 0.035274
     elif data[2] == DATA_MODE_GRAMS:
         grams = raw_weight
-        weight = "%s g" % grams
+        ounces = grams * 0.035274
 
-    print weight
+    return grams
+
+def send_jabber_message(messagebody):
+    client = xmpp.Client(JABBER_SERVER)
+    client.connect(server=(JABBER_SERVER, JABBER_PORT))
+    client.auth(JABBER_USER,JABBER_PASS,JABBER_NAME)
+    client.sendInitPresence()
+    client.send(xmpp.Presence(to="%s/%s" % (JABBER_ROOM, JABBER_NAME)))
+    message = xmpp.protocol.Message(body=messagebody)
+    message.setTo(JABBER_ROOM)
+    message.setType('groupchat')
+    client.send(message)
+
+def main():
+
+    scale_weight = read_scale_weight()
 
     # send jabber message if out of coffee or there is a fresh pot.
-    if raw_weight <= EMPTY_WEIGHT:
+    if scale_weight <= EMPTY_WEIGHT:
         messagebody = "We're out of coffee :("
-    elif raw_weight >= FULL_WEIGHT:
+    elif scale_weight >= FULL_WEIGHT:
         messagebody = 'Fresh pot of coffee!'
 
     send_jabber_message(messagebody)
