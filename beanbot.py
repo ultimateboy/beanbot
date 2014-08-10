@@ -8,10 +8,13 @@ except ImportError:
     raise Exception("You need a local_settings.py file!")
 
 # find the USB device
-device = usb.core.find(idVendor=VENDOR_ID,
-                       idProduct=PRODUCT_ID)
-if device.is_kernel_driver_active(0) is True:
-    device.detach_kernel_driver(0)
+device = usb.core.find(idVendor=VENDOR_ID, idProduct=PRODUCT_ID)
+
+try:
+    if device.is_kernel_driver_active(0) is True:
+        device.detach_kernel_driver(0)
+except:
+    raise Exception("Scale not detected. Not plugged in or not powered on.")
 
 # use the first/default configuration
 device.set_configuration()
