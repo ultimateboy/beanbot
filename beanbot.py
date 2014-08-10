@@ -2,26 +2,14 @@ import usb.core
 import usb.util
 import xmpp
 
-# todo: move to settings file.
-jabberuser = ''
-jabberpass = ''
-jabbername = 'beanbot'
-jabberroom = ''
-jabberserver = ''
-jabberport = 5222
-
-# Weight in grams of empty/full pot of coffee.
-emptyweight = 400 
-fullweight = 500 
-
-# Scale USB Vendor/Product IDs.
-VENDOR_ID = 0x0922
-PRODUCT_ID = 0x8004
+try:
+    from local_settings import *
+except ImportError:
+    raise Exception("You need a local_settings.py file!")
 
 # find the USB device
 device = usb.core.find(idVendor=VENDOR_ID,
                        idProduct=PRODUCT_ID)
-
 if device.is_kernel_driver_active(0) is True:
     device.detach_kernel_driver(0)
 
