@@ -35,9 +35,6 @@ while data is None and attempts > 0:
             attempts -= 1
             continue
 
-DATA_MODE_GRAMS = 2
-DATA_MODE_OUNCES = 11
-
 raw_weight = data[4] + data[5] * 256
 
 if data[2] == DATA_MODE_OUNCES:
