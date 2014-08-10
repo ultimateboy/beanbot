@@ -47,17 +47,17 @@ elif data[2] == DATA_MODE_GRAMS:
 print weight
 
 # send jabber message if out of coffee or there is a fresh pot.
-if raw_weight <= emptyweight:
+if raw_weight <= EMPTY_WEIGHT:
     messagebody = "We're out of coffee :("
-elif raw_weight >= fullweight:
+elif raw_weight >= FULL_WEIGHT:
     messagebody = 'Fresh pot of coffee!'
 
-client = xmpp.Client(jabberserver)
-client.connect(server=(jabberserver, jabberport))
-client.auth(jabberuser,jabberpass,jabbername)
+client = xmpp.Client(JABBER_SERVER)
+client.connect(server=(JABBER_SERVER, JABBER_PORT))
+client.auth(JABBER_USER,JABBER_PASS,JABBER_NAME)
 client.sendInitPresence()
-client.send(xmpp.Presence(to="%s/%s" % (jabberroom, jabbername)))
+client.send(xmpp.Presence(to="%s/%s" % (JABBER_ROOM, JABBER_NAME)))
 message = xmpp.protocol.Message(body=messagebody)
-message.setTo(jabberroom)
+message.setTo(JABBER_ROOM)
 message.setType('groupchat')
 client.send(message)

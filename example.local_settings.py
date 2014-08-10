@@ -1,14 +1,14 @@
 # Weight in grams of empty/full pot of coffee.
-emptyweight = 300
-fullweight = 4000
+EMPTY_WEIGHT = 300
+FULL_WEIGHT = 4000
 
 # Jabber server and authentication. Plain Text.
-jabberuser = ''
-jabberpass = ''
-jabbername = 'beanbot'
-jabberroom = ''
-jabberserver = ''
-jabberport = 5222
+JABBER_USER = ''
+JABBER_PASS = ''
+JABBER_NAME = 'beanbot'
+JABBER_ROOM = ''
+JABBER_PORT = 5222
+JABBER_SERVER = ''
 
 # Scale USB Vendor/Product IDs.
 # Dymo M25
