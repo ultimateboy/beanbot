@@ -1,5 +1,10 @@
 import usb.core
 import usb.util
+import time
+import picamera
+from wand.image import Image
+import glob
+import os
 from beanbot.chat import send_jabber_message
 
 try:
@@ -7,7 +12,7 @@ try:
 except ImportError:
     raise Exception("You need a local_settings.py file!")
 
-def main():
+def read_scale_weight():
     # find the USB device
     device = usb.core.find(idVendor=VENDOR_ID, idProduct=PRODUCT_ID)
 
@@ -38,22 +43,76 @@ def main():
 
     raw_weight = data[4] + data[5] * 256
 
+    # scale gives different raw_weight depending on oz/g mode.
     if data[2] == DATA_MODE_OUNCES:
         ounces = raw_weight * 0.1
-        weight = "%s oz" % ounces
+        grams = ounces / 0.035274
     elif data[2] == DATA_MODE_GRAMS:
         grams = raw_weight
-        weight = "%s g" % grams
+        ounces = grams * 0.035274
 
-    print weight
+    return grams
 
-    # send jabber message if out of coffee or there is a fresh pot.
-    if raw_weight <= EMPTY_WEIGHT:
-        messagebody = "We're out of coffee :("
-    elif raw_weight >= FULL_WEIGHT:
-        messagebody = 'Fresh pot of coffee!'
+def capture_animated_gif():
+    cwd = os.getcwd()
+    if not os.path.exists(cwd+"/images"):
+        os.makedirs(cwd+"/images")
 
-    send_jabber_message(messagebody)
+    with picamera.PiCamera() as camera:
+        camera.resolution = (640, 480)
+        camera.start_preview()
+        start = time.time()
+        # let the camera warm up.
+        time.sleep(2)
+        # capture 10 frames.
+        camera.capture_sequence((
+            'images/image%03d.png' % i
+            for i in range(10)
+            ), use_video_port=True, format='png')
+        print('Captured 10 images at %.2ffps' % (10 / (time.time() - start)))
+        camera.stop_preview()
+
+    # generate animated gif from 10 captured frames.
+    L = glob.glob(cwd+"/images/*.png")
+    L.sort()
+    series_to_animated_gif(L, cwd+"/images/animated.gif")
+
+def series_to_animated_gif(L, filepath):
+    imgs = Image(filename=L[0])
+    for i in L[1:]:
+        im2 = Image(filename=i)
+        imgs.sequence.append(im2)
+        for i in imgs.sequence:
+            i.delay = 25
+    imgs.save(filename=filepath)
+    imgs.close()
+    print('saved animated.gif')
+
+def send_jabber_message(messagebody):
+    client = xmpp.Client(JABBER_SERVER)
+    client.connect(server=(JABBER_SERVER, JABBER_PORT))
+    client.auth(JABBER_USER,JABBER_PASS,JABBER_NAME)
+    client.sendInitPresence()
+    client.send(xmpp.Presence(to="%s/%s" % (JABBER_ROOM, JABBER_NAME)))
+    message = xmpp.protocol.Message(body=messagebody)
+    message.setTo(JABBER_ROOM)
+    message.setType('groupchat')
+    client.send(message)
+
+def main():
+
+    scale_weight = read_scale_weight()
+
+    jabbermessage = ''
+    if scale_weight <= EMPTY_WEIGHT:
+        jabbermessage = "We're out of coffee :("
+    elif scale_weight > EMPTY_WEIGHT & scale_weight < ALERT_WEIGHT:
+        capture_animated_gif()
+    elif scale_weight >= FULL_WEIGHT:
+        jabbermessage = 'Fresh pot of coffee!'
+
+    if jabbermessage:
+        send_jabber_message(jabbermessage)
 
 if __name__ == '__main__':
     main()
