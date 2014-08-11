@@ -1,6 +1,7 @@
 # Weight in grams of empty/full pot of coffee.
 EMPTY_WEIGHT = 300
 FULL_WEIGHT = 4000
+ALERT_WEIGHT = 400
 
 # Jabber server and authentication. Plain Text.
 JABBER_USER = ''

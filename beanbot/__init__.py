@@ -1,6 +1,12 @@
 import usb.core
 import usb.util
 import xmpp
+import time
+import picamera
+from wand.image import Image
+import glob
+import os
+
 
 try:
     from local_settings import *
@@ -48,6 +54,41 @@ def read_scale_weight():
 
     return grams
 
+def capture_animated_gif():
+    cwd = os.getcwd()
+    if not os.path.exists(cwd+"/images"):
+        os.makedirs(cwd+"/images")
+
+    with picamera.PiCamera() as camera:
+        camera.resolution = (640, 480)
+        camera.start_preview()
+        start = time.time()
+        # let the camera warm up.
+        time.sleep(2)
+        # capture 10 frames.
+        camera.capture_sequence((
+            'images/image%03d.png' % i
+            for i in range(10)
+            ), use_video_port=True, format='png')
+        print('Captured 10 images at %.2ffps' % (10 / (time.time() - start)))
+        camera.stop_preview()
+
+    # generate animated gif from 10 captured frames.
+    L = glob.glob(cwd+"/images/*.png")
+    L.sort()
+    series_to_animated_gif(L, cwd+"/images/animated.gif")
+
+def series_to_animated_gif(L, filepath):
+    imgs = Image(filename=L[0])
+    for i in L[1:]:
+        im2 = Image(filename=i)
+        imgs.sequence.append(im2)
+        for i in imgs.sequence:
+            i.delay = 25
+    imgs.save(filename=filepath)
+    imgs.close()
+    print('saved animated.gif')
+
 def send_jabber_message(messagebody):
     client = xmpp.Client(JABBER_SERVER)
     client.connect(server=(JABBER_SERVER, JABBER_PORT))
@@ -63,13 +104,16 @@ def main():
 
     scale_weight = read_scale_weight()
 
-    # send jabber message if out of coffee or there is a fresh pot.
+    jabbermessage = ''
     if scale_weight <= EMPTY_WEIGHT:
-        messagebody = "We're out of coffee :("
+        jabbermessage = "We're out of coffee :("
+    elif scale_weight > EMPTY_WEIGHT & scale_weight < ALERT_WEIGHT:
+        capture_animated_gif()
     elif scale_weight >= FULL_WEIGHT:
-        messagebody = 'Fresh pot of coffee!'
+        jabbermessage = 'Fresh pot of coffee!'
 
-    send_jabber_message(messagebody)
+    if jabbermessage:
+        send_jabber_message(jabbermessage)
 
 if __name__ == '__main__':
     main()
