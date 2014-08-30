@@ -1,4 +1,5 @@
 import RPi.GPIO as GPIO
+import time
 
 try:
     from local_settings import *
@@ -6,6 +7,7 @@ except ImportError:
     raise Exception("You need a local_settings.py file!")
 
 # Prepare Berryclip.
+BUZZER = 8
 LEDS = [4,17,22,10,9,11]
 GPIO.setmode(GPIO.BCM)
 
@@ -32,3 +34,10 @@ def set_leds(led_list):
     for x in range(len(led_list)):
         GPIO.setup(LEDS[x], GPIO.OUT)
         GPIO.output(LEDS[x], bool(led_list[x]))
+
+def sound_buzzer(t = .01):
+    """ Buzz for t seconds. """
+    GPIO.setup(BUZZER, GPIO.OUT)
+    GPIO.output(BUZZER, True)
+    time.sleep(t)
+    GPIO.output(BUZZER, False)

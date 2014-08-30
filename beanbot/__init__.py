@@ -2,9 +2,8 @@ import time
 import atexit
 from beanbot.chat import *
 from beanbot.scale import *
-from beanbot.led import *
-from beanbot.buzzer import *
-from beanbot.gif import *
+from beanbot.berryclip import *
+from beanbot.picam import *
 
 try:
     from local_settings import *
@@ -38,7 +37,7 @@ def main():
             if not did_animated_gif:
                 print 'capturing gif'
                 # Buzz to warn of gif capture.
-                sound_buzz()
+                sound_buzzer()
                 capture_animated_gif()
                 did_animated_gif = int(time.time())
 
@@ -59,7 +58,7 @@ def main():
         elif scale_weight >= FULL_WEIGHT:
              # Buzz quickly once to inform full pot is ready.
              if not did_full_pot_buzz:
-                 sound_buzz()
+                 sound_buzzer()
                  did_full_pot_buzz = True
 
              # Send fresh pot notification to jabber.
