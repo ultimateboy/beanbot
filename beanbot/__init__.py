@@ -59,6 +59,7 @@ def read_scale_weight():
     return grams
 
 def scale_led_meter(scale_weight = 0):
+    """ Uses the Berryclip to create a meter showing the current weight. """
     # Determine percentage remaining.
     prct_left = (scale_weight / (FULL_WEIGHT - EMPTY_WEIGHT))
     # Determine how many lights to turn on.
@@ -75,7 +76,8 @@ def scale_led_meter(scale_weight = 0):
     # Turn the LEDS on/off.
     led(led_list)
 
-def led(led_list = range(len(LEDS))):
+def led(led_list):
+    """ Accepts a list of booleans to turn on/off the associated LEDs. """
     for x in range(len(led_list)):
         GPIO.setup(LEDS[x], GPIO.OUT)
         GPIO.output(LEDS[x], bool(led_list[x]))
