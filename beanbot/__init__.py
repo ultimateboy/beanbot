@@ -111,18 +111,7 @@ def capture_animated_gif():
     L = glob.glob(cwd+"/images/*.png")
     L.sort()
     series_to_animated_gif(L, cwd+"/images/animated.gif")
-
-def series_to_animated_gif(L, filepath):
-    imgs = Image(filename=L[0])
-    for i in L[1:]:
-        im2 = Image(filename=i)
-        imgs.sequence.append(im2)
-        for i in imgs.sequence:
-            i.delay = 25
-    imgs.save(filename=filepath)
-    imgs.close()
-    print('saved animated.gif')
-
+    #series_to_animated_gif(L, cwd+"/images/animated.gif").delay()
 
 def main():
     # Connect to jabber.
@@ -131,30 +120,42 @@ def main():
     did_full_pot_buzz = False
     did_jabber_empty = False
     did_jabber_full = False
+    did_animated_gif = False
+    did_post_animated_gif = False
     while True:
         # Get the current weight.
         scale_weight = read_scale_weight()
+        print str(scale_weight)
 
         scale_led_meter(scale_weight)
 
+        # Empty or below.
         if scale_weight <= EMPTY_WEIGHT:
+            # Send empty notification to jabber.
+            if not did_jabber_empty:
+                jabbermessage = "We're completely out of coffee :("
+                send_jabber_message(jabber_client, jabbermessage)
+                did_jabber_empty = True
+
+        # Greater than empty, but less than the alert weight.
+        elif scale_weight > EMPTY_WEIGHT and scale_weight < ALERT_WEIGHT:
+            if not did_animated_gif:
+                print 'would capture gif'
+                # capture_animated_gif()
+                did_animated_gif = int(time.time())
+
+        # Between halfway full and full.
+        elif scale_weight > ((FULL_WEIGHT - EMPTY_WEIGHT) / 2) \
+            and scale_weight < FULL_WEIGHT:
             # Reset full pot buzz and jabber notification.
             did_full_pot_buzz = False
             did_jabber_full = False
 
-            # Send empty notification to jabber.
-            if not did_jabber_empty:
-                jabbermessage = "We're out of coffee :("
-                send_jabber_message(jabber_client, jabbermessage)
-                did_jabber_empty = True
-
-        elif scale_weight > EMPTY_WEIGHT and scale_weight < ALERT_WEIGHT:
-            # capture_animated_gif()
-            print 'would capture gif'
-
         elif scale_weight >= FULL_WEIGHT:
-             # Reset jabber empty notification.
+             # Reset jabber empty notification and animated gif.
              did_jabber_empty = False
+             did_animated_gif = False
+             did_post_animated_gif = False
 
              # Buzz quickly once to inform full pot is ready.
              if not did_full_pot_buzz:
@@ -166,6 +167,14 @@ def main():
                  jabbermessage = 'Fresh pot of coffee!'
                  send_jabber_message(jabber_client, jabbermessage)
                  did_jabber_full = True
+
+        # Shame whoever emptied the pot and did not fill it back up within
+        # a reasonable amount of time.
+        if (did_animated_gif \
+            and did_animated_gif < (int(time.time() - POT_PREP_TIME))) \
+            and not did_post_animated_gif:
+            print 'would post gif'
+            did_post_animated_gif = True
 
 if __name__ == '__main__':
     main()
