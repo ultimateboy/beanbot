@@ -73,13 +73,21 @@ def scale_led_meter(scale_weight = 0):
     led_list = off_list + on_list
 
     # Turn the LEDS on/off.
-    led(led_list)
+    set_leds(led_list)
 
-def led(led_list):
+def set_leds(led_list):
     """ Accepts a list of booleans to turn on/off the associated LEDs. """
     for x in range(len(led_list)):
         GPIO.setup(LEDS[x], GPIO.OUT)
         GPIO.output(LEDS[x], bool(led_list[x]))
+
+def sound_buzz(t = .1):
+    """ Buzz for t seconds. """
+    GPIO.setup(8, GPIO.OUT)
+    GPIO.output(8, True)
+    time.sleep(t)
+    GPIO.output(8, False)
+    return True
 
 def capture_animated_gif():
     cwd = os.getcwd()
@@ -118,22 +126,30 @@ def series_to_animated_gif(L, filepath):
 
 
 def main():
-
+    full_pot_buzzed = False
+    jabbermessage = ''
     while True:
         # Get the current weight.
         scale_weight = read_scale_weight()
 
         scale_led_meter(scale_weight)
 
-        jabbermessage = ''
         if scale_weight <= EMPTY_WEIGHT:
+            # Reset full pot buzz.
+            full_pot_buzzed = False
+
             jabbermessage = "We're out of coffee :("
+
         elif scale_weight > EMPTY_WEIGHT and scale_weight < ALERT_WEIGHT:
             # capture_animated_gif()
             print 'would capture gif'
+
         elif scale_weight >= FULL_WEIGHT:
+             if not full_pot_buzzed:
+                 full_pot_buzzed = sound_buzz()
              jabbermessage = 'Fresh pot of coffee!'
 
+        # Send a jabber message if we have one to send.
         if jabbermessage:
             print 'would post to jabber:' + jabbermessage
             # commented out until we can be less annoying :P
