@@ -12,9 +12,6 @@ except ImportError:
     raise Exception("You need a local_settings.py file!")
 
 def main():
-    # Connect to jabber.
-    jabber_client = connect_jabber()
-
     did_full_pot_buzz = False
     did_jabber_empty = False
     did_jabber_full = False
@@ -82,6 +79,7 @@ def main():
 
 @atexit.register
 def goodbye():
+    # Turn LEDs off.
     set_leds([0] * len(LEDS))
 
 if __name__ == '__main__':

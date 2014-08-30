@@ -18,3 +18,6 @@ def send_jabber_message(client, messagebody):
     message.setTo(JABBER_ROOM)
     message.setType('groupchat')
     client.send(message)
+
+# Connect to jabber.
+jabber_client = connect_jabber()
