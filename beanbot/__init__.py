@@ -5,7 +5,12 @@ import picamera
 from wand.image import Image
 import glob
 import os
+import RPi.GPIO as GPIO
 from beanbot.chat import send_jabber_message
+
+# prepare berryclip
+LEDS = [4,17,22,10,9,11]
+GPIO.setmode(GPIO.BCM)
 
 try:
     from local_settings import *
@@ -53,6 +58,28 @@ def read_scale_weight():
 
     return grams
 
+def scale_led_meter(scale_weight = 0):
+    # Determine percentage remaining.
+    prct_left = (scale_weight / (FULL_WEIGHT - EMPTY_WEIGHT))
+    # Determine how many lights to turn on.
+    on = round(prct_left * len(LEDS))
+    # If weight is greater than FULL_WEIGHT, will return greater
+    # than number of LEDS we have. We won't let that happen.
+    if on > len(LEDS):
+      on = len(LEDS)
+
+    off_list = [0] * int((len(LEDS) - on))
+    on_list = [1] * int(on)
+    led_list = off_list + on_list
+
+    # Turn the LEDS on/off.
+    led(led_list)
+
+def led(led_list = range(len(LEDS))):
+    for x in range(len(led_list)):
+        GPIO.setup(LEDS[x], GPIO.OUT)
+        GPIO.output(LEDS[x], bool(led_list[x]))
+
 def capture_animated_gif():
     cwd = os.getcwd()
     if not os.path.exists(cwd+"/images"):
@@ -91,18 +118,25 @@ def series_to_animated_gif(L, filepath):
 
 def main():
 
-    scale_weight = read_scale_weight()
+    while True:
+        # Get the current weight.
+        scale_weight = read_scale_weight()
 
-    jabbermessage = ''
-    if scale_weight <= EMPTY_WEIGHT:
-        jabbermessage = "We're out of coffee :("
-    elif scale_weight > EMPTY_WEIGHT & scale_weight < ALERT_WEIGHT:
-        capture_animated_gif()
-    elif scale_weight >= FULL_WEIGHT:
-        jabbermessage = 'Fresh pot of coffee!'
+        scale_led_meter(scale_weight)
 
-    if jabbermessage:
-        send_jabber_message(jabbermessage)
+        jabbermessage = ''
+        if scale_weight <= EMPTY_WEIGHT:
+            jabbermessage = "We're out of coffee :("
+        elif scale_weight > EMPTY_WEIGHT and scale_weight < ALERT_WEIGHT:
+            # capture_animated_gif()
+            print 'would capture gif'
+        elif scale_weight >= FULL_WEIGHT:
+             jabbermessage = 'Fresh pot of coffee!'
+
+        if jabbermessage:
+            print 'would post to jabber:' + jabbermessage
+            # commented out until we can be less annoying :P
+            # send_jabber_message(jabbermessage)
 
 if __name__ == '__main__':
     main()
