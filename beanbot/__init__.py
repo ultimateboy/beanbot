@@ -66,8 +66,7 @@ def scale_led_meter(scale_weight = 0):
     on = round(prct_left * len(LEDS))
     # If weight is greater than FULL_WEIGHT, will return greater
     # than number of LEDS we have. We won't let that happen.
-    if on > len(LEDS):
-      on = len(LEDS)
+    on = len(LEDS) if on > len(LEDS) else on
 
     off_list = [0] * int((len(LEDS) - on))
     on_list = [1] * int(on)
