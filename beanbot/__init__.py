@@ -139,24 +139,26 @@ def main():
 
         # Greater than empty, but less than the alert weight.
         elif scale_weight > EMPTY_WEIGHT and scale_weight < ALERT_WEIGHT:
+            # Capture an animated gif to be sent later if pot not filled.
             if not did_animated_gif:
                 print 'would capture gif'
                 # capture_animated_gif()
                 did_animated_gif = int(time.time())
 
-        # Between halfway full and full.
-        elif scale_weight > ((FULL_WEIGHT - EMPTY_WEIGHT) / 2) \
+        # Between one quarter full and full.
+        elif scale_weight > ((FULL_WEIGHT - EMPTY_WEIGHT) / 4) \
             and scale_weight < FULL_WEIGHT:
+
             # Reset full pot buzz and jabber notification.
             did_full_pot_buzz = False
             did_jabber_full = False
 
-        elif scale_weight >= FULL_WEIGHT:
-             # Reset jabber empty notification and animated gif.
-             did_jabber_empty = False
-             did_animated_gif = False
-             did_post_animated_gif = False
+            # Reset jabber empty notification and animated gif.
+            did_jabber_empty = False
+            did_animated_gif = False
+            did_post_animated_gif = False
 
+        elif scale_weight >= FULL_WEIGHT:
              # Buzz quickly once to inform full pot is ready.
              if not did_full_pot_buzz:
                  sound_buzz()
@@ -173,6 +175,7 @@ def main():
         if (did_animated_gif \
             and did_animated_gif < (int(time.time() - POT_PREP_TIME))) \
             and not did_post_animated_gif:
+
             print 'would post gif'
             did_post_animated_gif = True
 
