@@ -16,9 +16,18 @@ def main():
     did_jabber_full = False
     did_animated_gif = False
     did_post_animated_gif = False
+
+    weight_history = []
+
     while True:
         # Get the current weight.
         scale_weight = read_scale_weight()
+        weight_history.append(scale_weight)
+
+        # Only keep the last 20 in history.
+        if len(weight_history) > 20:
+            weight_history.pop(0)
+
         print str(scale_weight)
 
         led_scale_meter(scale_weight)
