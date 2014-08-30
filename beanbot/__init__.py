@@ -126,8 +126,9 @@ def series_to_animated_gif(L, filepath):
 
 
 def main():
-    full_pot_buzzed = False
-    jabbermessage = ''
+    did_full_pot_buzz = False
+    did_jabber_empty = False
+    did_jabber_full = False
     while True:
         # Get the current weight.
         scale_weight = read_scale_weight()
@@ -135,25 +136,33 @@ def main():
         scale_led_meter(scale_weight)
 
         if scale_weight <= EMPTY_WEIGHT:
-            # Reset full pot buzz.
-            full_pot_buzzed = False
+            # Reset full pot buzz and jabber notification.
+            did_full_pot_buzz = False
+            did_jabber_full = False
 
-            jabbermessage = "We're out of coffee :("
+            # Send empty notification to jabber.
+            if not did_jabber_empty:
+                jabbermessage = "We're out of coffee :("
+                send_jabber_message(jabbermessage)
+                did_jabber_empty = True
 
         elif scale_weight > EMPTY_WEIGHT and scale_weight < ALERT_WEIGHT:
             # capture_animated_gif()
             print 'would capture gif'
 
         elif scale_weight >= FULL_WEIGHT:
-             if not full_pot_buzzed:
-                 full_pot_buzzed = sound_buzz()
-             jabbermessage = 'Fresh pot of coffee!'
+             # Reset jabber empty notification.
+             did_jabber_empty = False
 
-        # Send a jabber message if we have one to send.
-        if jabbermessage:
-            print 'would post to jabber:' + jabbermessage
-            # commented out until we can be less annoying :P
-            # send_jabber_message(jabbermessage)
+             # Buzz quickly once to inform full pot is ready.
+             if not did_full_pot_buzz:
+                 did_full_pot_buzz = sound_buzz()
+
+             # Send fresh pot notification to jabber.
+             if not did_jabber_full:
+                 jabbermessage = 'Fresh pot of coffee!'
+                 send_jabber_message(jabbermessage)
+                 did_jabber_full = True
 
 if __name__ == '__main__':
     main()
