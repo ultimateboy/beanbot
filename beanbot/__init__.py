@@ -81,13 +81,12 @@ def set_leds(led_list):
         GPIO.setup(LEDS[x], GPIO.OUT)
         GPIO.output(LEDS[x], bool(led_list[x]))
 
-def sound_buzz(t = .1):
+def sound_buzz(t = .01):
     """ Buzz for t seconds. """
     GPIO.setup(8, GPIO.OUT)
     GPIO.output(8, True)
     time.sleep(t)
     GPIO.output(8, False)
-    return True
 
 def capture_animated_gif():
     cwd = os.getcwd()
@@ -156,7 +155,8 @@ def main():
 
              # Buzz quickly once to inform full pot is ready.
              if not did_full_pot_buzz:
-                 did_full_pot_buzz = sound_buzz()
+                 sound_buzz()
+                 did_full_pot_buzz = True
 
              # Send fresh pot notification to jabber.
              if not did_jabber_full:
