@@ -3,6 +3,9 @@ EMPTY_WEIGHT = 300
 FULL_WEIGHT = 4000
 ALERT_WEIGHT = 400
 
+# Seconds it takes to load beans and water in to pot.
+POT_PREP_TIME = 90
+
 # Jabber server and authentication. Plain Text.
 JABBER_USER = ''
 JABBER_PASS = ''
