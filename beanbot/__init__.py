@@ -4,11 +4,7 @@ from beanbot.chat import *
 from beanbot.scale import *
 from beanbot.berryclip import *
 from beanbot.picam import *
-
-try:
-    from local_settings import *
-except ImportError:
-    raise Exception("You need a local_settings.py file!")
+from beanbot.settings import *
 
 def main():
     did_full_pot_buzz = False

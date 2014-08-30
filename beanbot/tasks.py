@@ -1,6 +1,5 @@
 from celery import Celery
 from wand.image import Image
-from beanbot import main
 from beanbot import celeryconfig
 
 celery = Celery('tasks')

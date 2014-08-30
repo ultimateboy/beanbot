@@ -1,10 +1,6 @@
 import usb.core
 import usb.util
-
-try:
-    from local_settings import *
-except ImportError:
-    raise Exception("You need a local_settings.py file!")
+from beanbot.settings import *
 
 def read_scale_weight():
     # find the USB device

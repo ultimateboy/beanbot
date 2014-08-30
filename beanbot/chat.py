@@ -1,10 +1,5 @@
 import xmpp
 
-try:
-    from local_settings import *
-except ImportError:
-    raise Exception("You need a local_settings.py file!")
-
 def connect_jabber():
     client = xmpp.Client(JABBER_SERVER)
     client.connect(server=(JABBER_SERVER, JABBER_PORT))

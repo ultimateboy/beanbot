@@ -1,14 +1,8 @@
 import RPi.GPIO as GPIO
 import time
-
-try:
-    from local_settings import *
-except ImportError:
-    raise Exception("You need a local_settings.py file!")
+from beanbot.settings import *
 
 # Prepare Berryclip.
-BUZZER = 8
-LEDS = [4,17,22,10,9,11]
 GPIO.setmode(GPIO.BCM)
 
 def led_scale_meter(scale_weight = 0):
