@@ -143,12 +143,15 @@ def main():
             # Capture an animated gif to be sent later if pot not filled.
             if not did_animated_gif:
                 print 'would capture gif'
+                # Buzz to warn of gif capture.
+                sound_buzz()
                 # capture_animated_gif()
                 did_animated_gif = int(time.time())
 
         # Between one quarter full and full.
         elif scale_weight > ((FULL_WEIGHT - EMPTY_WEIGHT) / 4) \
             and scale_weight < FULL_WEIGHT:
+            print 'quarter full'
 
             # Reset full pot buzz and jabber notification.
             did_full_pot_buzz = False
