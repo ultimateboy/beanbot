@@ -6,7 +6,7 @@ from wand.image import Image
 import glob
 import os
 import RPi.GPIO as GPIO
-from beanbot.chat import send_jabber_message
+from beanbot.chat import *
 
 # prepare berryclip
 LEDS = [4,17,22,10,9,11]
@@ -125,6 +125,9 @@ def series_to_animated_gif(L, filepath):
 
 
 def main():
+    # Connect to jabber.
+    jabber_client = connect_jabber()
+
     did_full_pot_buzz = False
     did_jabber_empty = False
     did_jabber_full = False
@@ -142,7 +145,7 @@ def main():
             # Send empty notification to jabber.
             if not did_jabber_empty:
                 jabbermessage = "We're out of coffee :("
-                send_jabber_message(jabbermessage)
+                send_jabber_message(jabber_client, jabbermessage)
                 did_jabber_empty = True
 
         elif scale_weight > EMPTY_WEIGHT and scale_weight < ALERT_WEIGHT:
@@ -161,7 +164,7 @@ def main():
              # Send fresh pot notification to jabber.
              if not did_jabber_full:
                  jabbermessage = 'Fresh pot of coffee!'
-                 send_jabber_message(jabbermessage)
+                 send_jabber_message(jabber_client, jabbermessage)
                  did_jabber_full = True
 
 if __name__ == '__main__':
