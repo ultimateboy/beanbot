@@ -6,6 +6,7 @@ from wand.image import Image
 import glob
 import os
 import RPi.GPIO as GPIO
+import atexit
 from beanbot.chat import *
 
 # prepare berryclip
@@ -178,6 +179,10 @@ def main():
 
             print 'would post gif'
             did_post_animated_gif = True
+
+@atexit.register
+def goodbye():
+    set_leds([0] * len(LEDS))
 
 if __name__ == '__main__':
     main()
