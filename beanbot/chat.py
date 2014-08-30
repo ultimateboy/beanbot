@@ -1,4 +1,5 @@
 import xmpp
+from beanbot.settings import *
 
 def connect_jabber():
     client = xmpp.Client(JABBER_SERVER)
